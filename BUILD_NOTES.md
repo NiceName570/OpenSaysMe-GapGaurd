@@ -23,3 +23,11 @@ Checked: combined manifest resources; scripts/styles for 14 HTML pages; worker s
 Not checked: the new combined extension in an actual browser, live publisher access, library services, streaming, or real-world page-script interactions. Those checks are explicitly handed back to the user in TESTING.md. Standalone success is not claimed as proof for this new extension.
 
 No GitHub repository was created or changed for this separate build.
+
+## 0.1.1: one program switch and one visual style
+
+The user requested OpenSaysMe's style throughout and a single on/off switch. The popup now has one automatically saved master control, with article tools collapsed and advanced preferences in Settings. Protection pages use the OpenSaysMe stylesheet and keyhole branding; the individual protection switches are hidden. Module preferences remain independent, but their enabled state follows the master switch.
+
+The coordinator gates both native static and generated rule collections while retaining virtual records. The power controller also configures the protection engine, pauses News/Research mutation/event APIs, aborts external lookups, and gates content-script startup and subsequent publisher timers/observers. Reloading a page is still required to reset article DOM changes already applied before Off.
+
+Regression checks cover whole-program rule shutdown/restoration, Off across worker restarts, paused publisher actions, rollback after a failed switch, and cancellation of an in-flight lookup. Live-site and browser visual testing remain assigned to the user.

@@ -2,6 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createRuleCoordinator } from '../src/rule-coordinator.mjs';
 import { outsidePrefixes, compileNewsRules, NEWS_BASE, NEWS_PRIORITY } from '../src/news-rules.mjs';
+import { createMasterSwitch } from '../src/master-switch.mjs';
+import { pausableNewsApi } from '../src/pause-news.mjs';
 
 const rule = (id, filter = 'ads.test') => ({ id, priority: 1, action: { type: 'block' }, condition: { urlFilter: filter, resourceTypes: ['script'] } });
 function fakeBrowser() {
@@ -12,11 +14,15 @@ function fakeBrowser() {
       async set(values) { Object.assign(data, structuredClone(values)); },
     };
   }
-  const values = { dynamic: [], session: [] };
+  const values = { dynamic: [], session: [], static: ['ruleset_1002'], mutations: 0 };
+  const runtimeListeners = new Set();
+  const requestListeners = new Set();
   const listeners = new Set();
   const api = {
     MAX_NUMBER_OF_SESSION_RULES: 5000, MAX_NUMBER_OF_UNSAFE_SESSION_RULES: 5000, MAX_NUMBER_OF_REGEX_RULES: 1000,
     onRuleMatchedDebug: { addListener: fn => listeners.add(fn), removeListener: fn => listeners.delete(fn) },
+    async getEnabledRulesets() { return [...values.static]; },
+    async updateEnabledRulesets({ disableRulesetIds = [], enableRulesetIds = [] }) { values.static = [...new Set(values.static.filter(id => !disableRulesetIds.includes(id)).concat(enableRulesetIds))]; },
   };
   let rejectNext = false;
   for (const kind of ['dynamic', 'session']) {
@@ -31,8 +37,18 @@ function fakeBrowser() {
     };
   }
   return {
-    chrome: { runtime: { id: 'test-extension', lastError: undefined }, storage: { local: storage(), session: storage() }, declarativeNetRequest: api },
+    chrome: {
+      runtime: { id: 'test-extension', lastError: undefined, getURL: path => 'chrome-extension://test-extension/' + path,
+        onMessage: { addListener: fn => runtimeListeners.add(fn), removeListener: fn => runtimeListeners.delete(fn) } },
+      storage: { local: storage(), session: storage() }, declarativeNetRequest: api,
+      action: { async setBadgeText() {}, async setIcon() {} },
+      tabs: { async query() { return []; }, async sendMessage() {}, async update() { values.mutations++; }, async reload() { values.mutations++; } },
+      scripting: { async executeScript() { values.mutations++; return []; }, async insertCSS() { values.mutations++; } },
+      cookies: { async remove() { values.mutations++; return null; } },
+      webRequest: { onCompleted: { addListener: fn => requestListeners.add(fn), removeListener: fn => requestListeners.delete(fn) } },
+    },
     values, reject: () => { rejectNext = true; }, emit: info => listeners.forEach(fn => fn(info)),
+    request: info => requestListeners.forEach(fn => fn(info)),
   };
 }
 
@@ -128,4 +144,80 @@ test('diagnostic events expose original IDs and never leak the other module matc
   browser.emit({ rule: { ruleId: browser.values.session[0].id, rulesetId: '_session' } });
   assert.deepEqual(seenProtection, [{ ruleId: 987654321, rulesetId: '_dynamic' }]);
   assert.deepEqual(seenNews, [{ ruleId: 987654321, rulesetId: '_dynamic' }]);
+});
+
+test('one power switch pauses static, dynamic, and publisher rules, then restores saved preferences', async () => {
+  const browser = fakeBrowser(); const coordinator = createRuleCoordinator(browser.chrome);
+  const master = createMasterSwitch(browser.chrome, coordinator); await master.ready;
+  const protection = coordinator.chromeFor('protection').declarativeNetRequest;
+  const news = coordinator.chromeFor('news').declarativeNetRequest;
+  await protection.updateDynamicRules({ addRules: [rule(10)] });
+  await protection.updateSessionRules({ addRules: [rule(20)] });
+  await news.updateDynamicRules({ addRules: [rule(30)] });
+  await master.setEnabled(false);
+  assert.equal(master.state().enabled, false);
+  assert.deepEqual(browser.values.static, []);
+  assert.deepEqual(browser.values.dynamic, []);
+  assert.deepEqual(browser.values.session, []);
+  assert.equal((await protection.getDynamicRules())[0].id, 10);
+  // Updates from either component while paused must not turn any native rules on.
+  await news.updateDynamicRules({ removeRuleIds: [30], addRules: [rule(31)] });
+  await protection.updateEnabledRulesets({ disableRulesetIds: ['ruleset_1002'], enableRulesetIds: ['ruleset_1001'] });
+  assert.deepEqual(browser.values.static, []); assert.deepEqual(browser.values.session, []);
+  await master.setEnabled(true);
+  assert.deepEqual(browser.values.static, ['ruleset_1001']);
+  assert.equal(browser.values.dynamic.length, 1); assert.equal(browser.values.session.length, 2);
+  assert.equal((await news.getDynamicRules())[0].id, 31);
+});
+
+test('saved Off survives a worker restart and a later On restores the desired ruleset', async () => {
+  const browser = fakeBrowser(); const first = createRuleCoordinator(browser.chrome);
+  const power = createMasterSwitch(browser.chrome, first); await power.ready;
+  await first.chromeFor('protection').declarativeNetRequest.updateDynamicRules({ addRules: [rule(77)] });
+  await power.setEnabled(false);
+  const restarted = createRuleCoordinator(browser.chrome);
+  const nextPower = createMasterSwitch(browser.chrome, restarted); await nextPower.ready;
+  assert.equal(nextPower.isEnabled(), false); assert.deepEqual(browser.values.dynamic, []); assert.deepEqual(browser.values.static, []);
+  await nextPower.setEnabled(true);
+  assert.equal(browser.values.dynamic.length, 1); assert.deepEqual(browser.values.static, ['ruleset_1002']);
+});
+
+test('Off suppresses queued publisher injections, cookie changes, navigation, and event callbacks', async () => {
+  const browser = fakeBrowser(); const coordinator = createRuleCoordinator(browser.chrome);
+  const master = createMasterSwitch(browser.chrome, coordinator); await master.ready;
+  const news = pausableNewsApi(coordinator.chromeFor('news'), master);
+  let completed = 0;
+  news.webRequest.onCompleted.addListener(() => completed++);
+  browser.request({}); assert.equal(completed, 1);
+  await master.setEnabled(false);
+  browser.request({}); assert.equal(completed, 1);
+  await news.cookies.remove({}); await news.scripting.executeScript({}); await news.tabs.update(1, {});
+  assert.equal(browser.values.mutations, 0);
+  await assert.rejects(master.fetch('https://example.invalid/'), /is off/);
+  await master.setEnabled(true);
+  await news.cookies.remove({}); browser.request({});
+  assert.equal(browser.values.mutations, 1); assert.equal(completed, 2);
+});
+
+test('a failed module pause restores the previous master position and network rules', async () => {
+  const browser = fakeBrowser(); const coordinator = createRuleCoordinator(browser.chrome);
+  const master = createMasterSwitch(browser.chrome, coordinator); await master.ready;
+  await coordinator.chromeFor('protection').declarativeNetRequest.updateDynamicRules({ addRules: [rule(5)] });
+  master.register('test module', async value => { if (!value) throw new Error('Pause failed'); });
+  await assert.rejects(master.setEnabled(false), /Pause failed/);
+  assert.equal(master.isEnabled(), true); assert.equal(browser.values.dynamic.length, 1);
+  assert.equal((await browser.chrome.storage.local.get('combined:enabled'))['combined:enabled'], true);
+});
+
+test('Off aborts an in-flight research lookup', async () => {
+  const browser = fakeBrowser(); const coordinator = createRuleCoordinator(browser.chrome);
+  const master = createMasterSwitch(browser.chrome, coordinator); await master.ready;
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = (url, { signal }) => new Promise((resolve, reject) => signal.addEventListener('abort', () => reject(new Error('Lookup aborted')), { once: true }));
+  try {
+    const rejected = assert.rejects(master.fetch('https://example.invalid/'), /Lookup aborted/);
+    await new Promise(setImmediate);
+    await master.setEnabled(false);
+    await rejected;
+  } finally { globalThis.fetch = originalFetch; }
 });

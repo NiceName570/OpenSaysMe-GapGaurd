@@ -36,14 +36,22 @@ for (const file of await walk(output)) {
     }
   }
 }
-for (const file of ['service-worker.js', 'rule-coordinator.js', 'news-research-background.js', 'protection-background.js', 'popup.js', 'settings.js']) {
+for (const file of ['service-worker.js', 'rule-coordinator.js', 'news-research-background.js', 'protection-background.js', 'popup.js', 'settings.js', 'content-gate.js', 'master-page.js', 'contentScript.js', ...manifest.content_scripts.flatMap(group => group.js)]) {
   const checked = spawnSync(process.execPath, ['--check', path.join(output, file)], { encoding: 'utf8' });
   assert.equal(checked.status, 0, `${file}: ${checked.stderr}`);
 }
 const protectedBackground = await fs.readFile(path.join(output, 'protection-background.js'), 'utf8');
 assert.ok(protectedBackground.includes('chromeFor("protection")'));
+assert.ok(protectedBackground.includes('CombinedMaster.register("protection"'));
 const newsBackground = await fs.readFile(path.join(output, 'news-research-background.js'), 'utf8');
-assert.ok(newsBackground.includes('chromeFor("news")'));
+assert.ok(newsBackground.includes('CombinedNewsChrome'));
+assert.ok(newsBackground.includes('CombinedMaster.fetch'));
+const popupHtml = await fs.readFile(path.join(output, 'popup.html'), 'utf8');
+assert.equal([...popupHtml.matchAll(/type="checkbox"/g)].length, 1, 'Popup must have one master switch.');
+assert.ok(manifest.content_scripts.every(group => group.js[0] === 'content-gate.js'), 'Every declarative script must follow global power.');
+const protectionCss = await fs.readFile(path.join(output, 'protection-style.css'), 'utf8');
+assert.ok(protectionCss.includes('shared/theme.css'));
+assert.ok(!protectionCss.includes('#0c151e'));
 const protectionCheck = spawnSync(process.execPath, ['scripts/check.mjs'], { cwd: path.join(root, 'components/gapguard'), stdio: 'inherit' });
 assert.equal(protectionCheck.status, 0, 'Upstream protection reader/rule checks failed.');
 const sourceManifest = JSON.parse(await fs.readFile(path.join(root, 'components/gapguard/extension/manifest.json'), 'utf8'));

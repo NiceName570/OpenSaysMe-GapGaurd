@@ -6,6 +6,8 @@ export function createRuleCoordinator(native) {
   const records = { protection: { dynamic: [], session: [] }, news: { dynamic: [], session: [] } };
   const maps = { dynamic: new Map(), session: new Map() };
   let queue = Promise.resolve();
+  let masterEnabled = false;
+  let desiredRulesets = [];
   const key = (owner, kind) => `combined:dnr:${owner}:${kind}`;
   const area = (owner, kind) => owner === 'protection' && kind === 'dynamic' ? native.storage.local : native.storage.session;
   function entries(owner, kind, next = records[owner]) {
@@ -19,7 +21,7 @@ export function createRuleCoordinator(native) {
     const apiKind = kind[0].toUpperCase() + kind.slice(1);
     const existing = await native.declarativeNetRequest[`get${apiKind}Rules`]();
     const belongs = id => owner === 'news' ? id > NEWS_BASE && id < 2 * NEWS_BASE : id > 0 && id < NEWS_BASE;
-    const rows = entries(owner, kind, next);
+    const rows = masterEnabled ? entries(owner, kind, next) : [];
     await native.declarativeNetRequest[`update${apiKind}Rules`]({
       removeRuleIds: existing.filter(rule => belongs(rule.id)).map(rule => rule.id), addRules: rows.map(row => row.actual),
     });
@@ -27,6 +29,10 @@ export function createRuleCoordinator(native) {
     for (const row of rows) maps[kind].set(row.actual.id, { owner, id: row.originalId, kind: row.originalKind });
   }
   const ready = (async () => {
+    const power = await native.storage.local.get(['combined:enabled', 'combined:desiredRulesets']);
+    masterEnabled = power['combined:enabled'] !== false;
+    desiredRulesets = power['combined:desiredRulesets'] ?? (native.declarativeNetRequest.getEnabledRulesets ? await native.declarativeNetRequest.getEnabledRulesets() : []);
+    if (!power['combined:desiredRulesets']) await native.storage.local.set({ 'combined:desiredRulesets': desiredRulesets });
     for (const owner of owners) for (const kind of ['dynamic', 'session']) {
       const data = await area(owner, kind).get(key(owner, kind));
       records[owner][kind] = data[key(owner, kind)] ?? [];
@@ -34,6 +40,7 @@ export function createRuleCoordinator(native) {
     await install('protection', 'dynamic');
     await install('protection', 'session');
     await install('news', 'session');
+    await applyStatic();
   })();
   function serial(task) {
     const result = queue.catch(() => {}).then(() => ready).then(task);
@@ -43,9 +50,32 @@ export function createRuleCoordinator(native) {
   async function status() {
     await native.storage.local.set({ 'combined:ruleStatus': {
       protectionDynamic: records.protection.dynamic.length, protectionSession: records.protection.session.length,
-      newsSourceRules: records.news.dynamic.length, newsInstalledRules: entries('news', 'session').length,
+      newsSourceRules: records.news.dynamic.length, newsInstalledRules: masterEnabled ? entries('news', 'session').length : 0, enabled: masterEnabled,
       guardedNewsTabs: records.news.session.length, updated: new Date().toISOString(),
     } });
+  }
+  async function applyStatic() {
+    if (!native.declarativeNetRequest.getEnabledRulesets) return;
+    const current = await native.declarativeNetRequest.getEnabledRulesets();
+    const desired = masterEnabled ? desiredRulesets : [];
+    await native.declarativeNetRequest.updateEnabledRulesets({ disableRulesetIds: current.filter(id => !desired.includes(id)), enableRulesetIds: desired.filter(id => !current.includes(id)) });
+  }
+  function setEnabled(value) {
+    if (typeof value !== 'boolean') return Promise.reject(new Error('Power must be on or off.'));
+    return serial(async () => {
+      const previous = masterEnabled;
+      masterEnabled = value;
+      try {
+        await applyStatic();
+        await install('protection', 'dynamic'); await install('protection', 'session'); await install('news', 'session');
+      } catch (error) {
+        masterEnabled = previous;
+        await applyStatic();
+        await install('protection', 'dynamic'); await install('protection', 'session'); await install('news', 'session');
+        throw error;
+      }
+      status().catch(console.error);
+    });
   }
   function update(owner, kind, changes) {
     return serial(async () => {
@@ -109,6 +139,15 @@ export function createRuleCoordinator(native) {
         const kind = name === 'updateDynamicRules' ? 'dynamic' : 'session';
         return (changes, callback) => finish(update(owner, kind, changes), callback);
       }
+      if (name === 'getEnabledRulesets') return callback => finish(serial(() => [...desiredRulesets]), callback);
+      if (name === 'updateEnabledRulesets') return (changes, callback) => finish(serial(async () => {
+        const previous = desiredRulesets;
+        desiredRulesets = [...new Set(desiredRulesets.filter(id => !(changes.disableRulesetIds ?? []).includes(id)).concat(changes.enableRulesetIds ?? []))];
+        try {
+          await native.storage.local.set({ 'combined:desiredRulesets': desiredRulesets });
+          await applyStatic();
+        } catch (error) { desiredRulesets = previous; await native.storage.local.set({ 'combined:desiredRulesets': previous }); throw error; }
+      }), callback);
       if (name === 'getMatchedRules' || name === 'testMatchOutcome') return (request, callback) => finish((async () => {
         await ready;
         const result = await target[name](request);
@@ -132,5 +171,5 @@ export function createRuleCoordinator(native) {
       return typeof value === 'function' ? value.bind(target) : value;
     } });
   }
-  return { chromeFor, ready };
+  return { chromeFor, ready, setEnabled };
 }

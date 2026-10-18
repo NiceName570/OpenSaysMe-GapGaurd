@@ -1,5 +1,8 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>OpenSaysMe + GapGuard</title><link rel="stylesheet" href="combined.css"></head>
-<body class="popup-shell"><header><img src="images/opensaysme-48.png" alt=""><div><strong>OpenSaysMe <span>+ GapGuard</span></strong><small id="current-site">Protection · News · Research</small></div><a href="settings.html" target="_blank">Settings</a></header>
-<nav aria-label="Tools"><button id="protection" aria-pressed="true">Protection</button><button id="news" aria-pressed="false">News</button><button id="research" aria-pressed="false">Research</button></nav>
-<p id="module-hint">Ad and tracker protection. Switches save automatically.</p><iframe id="tools" src="protection-popup.html" title="Ad and tracker protection"></iframe><p id="shell-error" role="status" hidden></p><script src="popup.js"></script></body></html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>OpenSaysMe</title><link rel="stylesheet" href="combined.css"></head>
+<body class="popup-shell"><header><img src="images/opensaysme-48.png" alt=""><div><strong>OpenSaysMe</strong><small>Protection · News · Research</small></div><a href="settings.html" target="_blank">Settings</a></header>
+<main class="power-main"><section class="power-card"><label class="power-row" for="power-toggle"><span><strong id="power-label">Loading…</strong><small>One switch for everything</small></span><input id="power-toggle" type="checkbox" role="switch" aria-label="OpenSaysMe on or off" disabled></label><p id="power-summary">Reading your saved setting…</p></section>
+<p id="power-message" role="status" aria-live="polite"></p><p class="reload-note">Saves automatically. Reload webpages after switching.</p>
+<button id="picker" class="secondary">Block an element</button>
+<details id="extra-tools"><summary>News &amp; research tools</summary><nav aria-label="Article tools"><button id="news" aria-pressed="true">News</button><button id="research" aria-pressed="false">Research</button></nav><iframe id="tools" title="Article tools" hidden></iframe></details>
+</main><script src="popup.js"></script></body></html>

@@ -6,7 +6,7 @@ function show(data) {
   if (error) { document.getElementById('rule-summary').textContent = 'Coordinator could not start: ' + error; return; }
   const state = data['combined:ruleStatus'];
   if (!state) return;
-  document.getElementById('rule-summary').textContent = `${state.newsInstalledRules} publisher network rules; ${state.protectionDynamic} custom protection rules; ${state.protectionSession} protection session rules. IDs, deletion, and preferences are isolated by module.`;
+  document.getElementById('rule-summary').textContent = state.enabled === false ? 'OpenSaysMe is off. Saved preferences are retained.' : `${state.newsInstalledRules} publisher network rules; ${state.protectionDynamic} custom protection rules; ${state.protectionSession} protection session rules.`;
 }
 function newsStatus(data) {
   const state = data['osm:rules'];
