@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="../shared/storage.js"></script>
+<script src="../shared/mv3-compat.js"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OpenSaysMe · News settings</title>
+  <link rel="stylesheet" href="style.css"/>
+<link rel="stylesheet" href="../shared/theme.css">
+<link rel="icon" href="../images/opensaysme.svg">
+</head>
+<body class="osm-page">
+<div class="page">
+<header class="osm-page-header"><a class="osm-brand" href="../settings.html"><img src="../images/opensaysme.svg" alt=""><span><strong>OpenSaysMe</strong><small>News settings</small></span></a><a href="../settings.html">All settings</a></header>
+  <h1>News settings | <small><span id="version"></span><br><span id="version_new"></span></small></h1>
+  <a href="https://gitlab.com/magnolia1234/bypass-paywalls-chrome-clean/-/blob/master/changelog.txt" target="_blank">Changelog</a>
+  <div class="card">
+    <br>Most selected sites will have their cookies cleared (not all though).<br>
+    You should uncheck the sites (or add to excluded sites) for which you have an account or else you will be logged out at every visit.<br><br>
+    If you want to also block general paywall-scripts for non-listed sites you have to opt-in to custom sites (permission for access to all sites is needed).<br>
+    To view some sites (check list) a necessary cookie has to be set (enable this in opt-in).
+  </div>
+  <div class="nav">
+    <a class="btn" href="options_custom.html">Custom sites</a>
+    <button id="sites_updated"><small>Updated sites?</small></button>
+    <a class="btn" href="optin/opt-in.html">Opt-in</a>
+    <a class="btn" href="options_excluded.html">Excluded sites</a>
+    <a class="btn" href="#save">Go to save</a>
+  </div>
+  <strong><div id="perm-custom"></div></strong>
+    <br>
+  <div class="searchbar">
+    <input type="search" id="site_search" placeholder="Search a site or domain to check if it is already added..." autocomplete="off">
+    <div id="search_result" class="search-result"></div>
+  </div>
+  <div id='bypass_sites'></div>
+  <br>
+  <div id="status"></div>
+  <div id="error"></div>
+  <div class="actions">
+    <button class="primary" id="save">Save</button>
+    <button id="select-all">Select all</button>
+    <button id="select-none">Select none</button>
+    <a class="btn" href="options_custom.html">Custom sites</a>
+    <a class="btn" href="options_excluded.html">Excluded sites</a>
+    <button id="button-close">Close</button>
+  </div>
+  <script src="../sites.js"></script>
+  <script src="options.js"></script>
+  <script src="version.js"></script>
+</div>
+</body>
+</html>
