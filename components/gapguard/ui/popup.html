@@ -1,0 +1,6 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>GapGuard</title><link rel="stylesheet" href="style.css"></head>
+<body class="popup"><header><img class="brand-icon" src="icons/icon-48.png" width="44" height="44" alt=""><div><h1>GapGuard</h1><p>Personal protection</p></div><span id="state" class="pill">Starting</span></header>
+<main><section><label class="switch-row"><span>Protection</span><input id="enabled" type="checkbox"></label><p id="host" class="domain">Loading…</p><button id="site" class="secondary">Pause on this site</button><p id="hint" class="muted"></p></section>
+<section><label class="switch-row"><span>Combined coverage</span><input id="supplemental" type="checkbox"></label><p class="muted">Core filtering plus deduplicated supplemental lists. Turn off to compare.</p><label class="switch-row"><span>YouTube skip helper</span><input id="youtubeRecovery" type="checkbox"></label><p class="muted">Optional: clicks a visible Skip ad button. Experimental; off by default.</p></section>
+<section class="row"><button id="picker" class="secondary">Block an element</button><button id="options">Settings &amp; tests</button></section><p id="message" role="status" aria-live="polite"></p><p class="muted" id="count"></p></main><script src="popup.js"></script></body></html>

@@ -1,0 +1,4 @@
+/* OpenSaysMe appearance, scoped to the extension's own research badges. */
+.oahelper_doifound_outer{background-color:#2563eb!important;color:white!important;border-color:#2563eb!important}
+.oahelper_opencitations_outer,.oahelper_openalexcitation_outer,.oahelper_retractionwatch_outer{background-color:#eff6ff!important;border-color:#2563eb!important;color:#172b4d!important}
+html[data-osm-enabled="false"] [class*="oahelper_"]{display:none!important}

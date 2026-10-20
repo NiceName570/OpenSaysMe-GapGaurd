@@ -1,0 +1,4 @@
+* text=auto
+# Preserve vendored component sources byte-for-byte.
+/components/opensaysme/** -text
+/components/gapguard/** -text

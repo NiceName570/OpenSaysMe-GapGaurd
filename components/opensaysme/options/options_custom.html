@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="../shared/storage.js"></script>
+<script src="../shared/mv3-compat.js"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OpenSaysMe – Custom sites</title>
+  <link rel="stylesheet" href="style.css"/>
+<link rel="stylesheet" href="../shared/theme.css">
+<link rel="icon" href="../images/opensaysme.svg">
+</head>
+<body class="osm-page">
+<div class="page">
+<header class="osm-page-header"><a class="osm-brand" href="../settings.html"><img src="../images/opensaysme.svg" alt=""><span><strong>OpenSaysMe</strong><small>Custom sites</small></span></a><a href="../settings.html">All settings</a></header>
+  <h2>Custom sites</h2>
+  <p class="lead">Add a site, flip the switches you want, and press Add. Most sites only need the site name.</p>
+
+  <div class="card">
+    <p class="muted" style="margin-top:0">
+      Works for sites not in the default list. Needs <a href="optin/opt-in.html">Opt-in</a> (currently: <span class="badge" id="custom-enabled"></span>).
+    </p>
+    <h3>Add a site</h3>
+    <div id="add_site"></div>
+    <div id="status_add"></div>
+    <div class="actions"><button class="primary" id="add">Add site</button></div>
+  </div>
+
+  <div class="card">
+    <h3>Your sites</h3>
+    <input type="search" id="custom_search" placeholder="Search your sites..." autocomplete="off" style="width:100%;margin-bottom:8px">
+    <div class="muted" style="margin-bottom:8px">* = already in default list (double domain)</div>
+    <div id="custom_sites"></div>
+    <div id="status_delete"></div>
+    <div class="actions">
+      <button class="danger" id="delete">Delete</button>
+      <button id="edit">Edit (re-Add)</button>
+      <button id="perm_request">Request permissions</button>
+      <button id="perm_remove">Remove permissions</button>
+    </div>
+    <p class="muted" style="margin-bottom:0">Permissions granted (all in custom list + updated): <strong><span id="perm-custom"></span></strong></p>
+  </div>
+
+  <div class="card">
+    <h3>JSON</h3>
+    <p class="muted" style="margin-top:0">Edit or sort the text and save (only when valid). Clear &amp; save to reset. Export/import to move between installations.</p>
+    <div id="bypass_sites"></div>
+    <div id="status"></div>
+    <div id="error"></div>
+    <div class="actions">
+      <button class="primary" id="save">Save</button>
+      <button id="sort">Sort</button>
+      <button id="export">Export</button>
+      <button id="import">Import</button>
+      <input type="file" id="importInput" accept=".txt" style="display:none"/>
+      <a class="btn" href="options.html">Options</a>
+    </div>
+  </div>
+</div>
+<script src="../sites.js"></script>
+<script src="options_custom.js"></script>
+</body>
+</html>

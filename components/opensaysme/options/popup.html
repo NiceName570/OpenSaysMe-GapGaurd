@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>OpenSaysMe · News tools</title>
+<script src="../shared/storage.js"></script>
+<script src="../shared/mv3-compat.js"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="style.css"/>
+<link rel="stylesheet" href="../shared/theme.css">
+<link rel="icon" href="../images/opensaysme.svg">
+</head>
+<body class="popup osm-tool-popup">
+  <div class="popup-head">
+    <img src="../images/opensaysme.svg" alt="">
+    <div class="title"><strong>News tools</strong><small id="version"></small></div>
+    <span id="site_switch_span"></span>
+  </div>
+  <div class="popup-links">
+    <button class="primary" id="add_site_btn" title="add the current site to your custom sites">+ Add this site</button>
+    <a class="btn" href="options.html" target="_blank">Options</a>
+    <button id="clear_cookies" title="clear cookies (and local storage) for current site">Clear cookies</button>
+    <button id="button-close" title="close popup">Close</button>
+  </div>
+  <div id="add_status" class="popup-status"></div>
+  <div id="version_new"></div>
+  <div class="popup-foot"><a href="../settings.html" target="_blank">All settings</a> · <a href="options_custom.html" target="_blank">Custom sites</a></div>
+<script src="../sites.js"></script>
+<script id="popup" src="version.js"></script>
+<script src="detect.js"></script>
+<script src="popup.js"></script>
+</body>
+</html>
