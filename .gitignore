@@ -2,6 +2,7 @@
 /extension/
 /build/
 /reports/
+/dist/
 /components/gapguard/node_modules/
 /components/gapguard/extension/
 /components/gapguard/sources/

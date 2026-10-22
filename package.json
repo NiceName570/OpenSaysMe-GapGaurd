@@ -8,7 +8,8 @@
     "build": "node scripts/build.mjs",
     "build:protection": "node scripts/build.mjs --rebuild-protection",
     "check": "node scripts/check.mjs",
-    "test": "node --test test/*.test.mjs"
+    "test": "node --test test/*.test.mjs",
+    "package": "npm run build && npm run check && node scripts/package.mjs"
   },
   "dependencies": {
     "@adguard/dnr-converter": "2.0.0",

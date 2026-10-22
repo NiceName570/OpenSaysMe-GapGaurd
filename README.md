@@ -17,6 +17,12 @@ One personal Chromium extension in OpenSaysMe's blue-and-white style. **One tool
 
 The original project folders are preserved. This is a new extension identity with fresh preferences; existing installations are not automatically changed or imported. Protection settings can be exported from standalone GapGuard and imported into the combined Protection settings. Research/library preferences need to be configured for this installation.
 
+## Share it as a ZIP
+
+`npm run package` builds, checks, and writes `dist/OpenSaysMe.zip`. The files sit at the top of the ZIP, so extracting it on Windows or macOS creates one `OpenSaysMe` folder with `manifest.json` directly inside. That folder is the one to choose at **Load unpacked**. The ZIP also contains `READ ME FIRST.txt`, plain step-by-step instructions for Chrome and Edge (source: `docs/READ-ME-FIRST.txt`).
+
+The ZIP keeps the same name for every version on purpose. Chrome ties an unpacked extension to its folder, so for an update the recipient copies the new files into the same folder and clicks reload, which keeps their settings.
+
 ## How the modules coexist
 
 The background uses a rule coordinator, rather than letting either component replace the extension's entire rule collection. Each module sees its own virtual rule IDs, gets only its own rule collection, and can delete only its own rules. The coordinator restores its persisted records after worker suspension and translates diagnostic matches back to the module's IDs.
