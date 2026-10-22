@@ -1,0 +1,82 @@
+OpenSaysMe (version {{version}})
+How to install it in Chrome or Microsoft Edge
+=============================================
+
+This takes about 5 minutes. You only do it once.
+
+
+STEP 1: Put the folder somewhere it can stay
+--------------------------------------------
+1. Find the file you were sent, OpenSaysMe.zip (usually in Downloads).
+2. Right-click it and choose "Extract All..." then click "Extract".
+   (On a Mac, just double-click it.)
+3. A folder called OpenSaysMe appears. This file is inside it.
+4. Move that OpenSaysMe folder into your Documents folder.
+
+IMPORTANT: Leave the OpenSaysMe folder in Documents forever.
+If it is moved, renamed, or deleted, the extension stops working.
+You can delete the .zip file now.
+
+
+STEP 2: Open the extensions page
+--------------------------------
+Not sure which browser you have?
+  - Chrome has a round red, yellow, and green icon.
+  - Edge has a blue and green swirl icon.
+
+Click the address bar at the top (where you type websites), type
+the line for your browser, and press Enter:
+
+  Chrome:  chrome://extensions
+  Edge:    edge://extensions
+
+
+STEP 3: Turn on Developer mode
+------------------------------
+  Chrome:  The "Developer mode" switch is in the TOP RIGHT corner.
+  Edge:    The "Developer mode" switch is on the LEFT side, near the bottom.
+
+Click it so it turns on. New buttons appear.
+
+
+STEP 4: Load the folder
+-----------------------
+1. Click the "Load unpacked" button.
+2. A window opens to pick a folder. Go to Documents and click
+   the OpenSaysMe folder ONCE (do not open it).
+3. Click "Select Folder".
+
+"OpenSaysMe + GapGuard" now shows on the extensions page.
+If you see the message "Manifest file is missing", you picked the
+wrong folder. Pick the OpenSaysMe folder that holds this file.
+
+
+STEP 5: Put the button on the toolbar
+-------------------------------------
+1. Click the puzzle-piece icon to the right of the address bar.
+2. Find OpenSaysMe and click the pin next to it.
+
+The blue OpenSaysMe keyhole button now stays next to the address bar.
+Click it any time to switch everything On or Off.
+After switching, reload the web page to see the change.
+
+
+GOOD TO KNOW
+------------
+- Leave Developer mode on. Turning it off can turn the extension off.
+- If the browser ever asks you to turn off "developer mode extensions",
+  choose to keep them, or the extension stops.
+- If the other OpenSaysMe, GapGuard, Bypass Paywalls Clean, or
+  Open Access Helper extensions are installed, turn those off on the
+  extensions page so they don't fight with this one.
+
+
+GETTING AN UPDATE LATER
+-----------------------
+1. Extract the new OpenSaysMe.zip.
+2. Copy everything from the new OpenSaysMe folder INTO the old one in
+   Documents. Choose "Replace the files in the destination" if asked.
+3. Go back to chrome://extensions or edge://extensions and click the
+   circular-arrow reload button on OpenSaysMe.
+
+Your settings are kept because the folder stays in the same place.
